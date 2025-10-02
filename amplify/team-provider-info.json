@@ -1,0 +1,26 @@
+{
+  "prod": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-realtimechat-prod-e227b-authRole",
+      "UnauthRoleArn": "arn:aws:iam::453929087590:role/amplify-realtimechat-prod-e227b-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::453929087590:role/amplify-realtimechat-prod-e227b-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-realtimechat-prod-e227b-deployment",
+      "UnauthRoleName": "amplify-realtimechat-prod-e227b-unauthRole",
+      "StackName": "amplify-realtimechat-prod-e227b",
+      "StackId": "arn:aws:cloudformation:us-east-1:453929087590:stack/amplify-realtimechat-prod-e227b/47eaa8a0-9fc5-11f0-b9b2-0e8a0b552e0d",
+      "AmplifyAppId": "d34rmw54y15yon"
+    },
+    "categories": {
+      "auth": {
+        "realtimechat75d27768": {}
+      },
+      "api": {
+        "realtimechat": {}
+      },
+      "storage": {
+        "chatappStorage": {}
+      }
+    }
+  }
+}
