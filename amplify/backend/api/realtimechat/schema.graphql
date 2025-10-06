@@ -1,6 +1,76 @@
+type User @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  email: String! @index(name: "byEmail", queryField: "getUserByEmail")
+  username: String
+  displayName: String
+  avatar: String
+  isOnline: Boolean
+  lastSeenAt: AWSDateTime
+  conversations: [ConversationMember] @hasMany(indexName: "byUser", fields: ["id"])
+  messages: [Message] @hasMany(indexName: "byAuthor", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Conversation @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  name: String
+  isGroup: Boolean!
+  avatar: String
+  lastMessageAt: AWSDateTime
+  members: [ConversationMember] @hasMany(indexName: "byConversation", fields: ["id"])
+  messages: [Message] @hasMany(indexName: "byConversation", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ConversationMember @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  userId: ID! @index(name: "byUser", sortKeyFields: ["conversationId"])
+  conversationId: ID! @index(name: "byConversation", sortKeyFields: ["userId"])
+  user: User @belongsTo(fields: ["userId"])
+  conversation: Conversation @belongsTo(fields: ["conversationId"])
+  role: String
+  joinedAt: AWSDateTime!
+  isActive: Boolean
+  lastReadAt: AWSDateTime
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
 type Message @model @auth(rules: [{ allow: private }]) {
   id: ID!
+  conversationId: ID! @index(name: "byConversation", sortKeyFields: ["createdAt"], queryField: "messagesByConversation")
+  authorId: ID! @index(name: "byAuthor", sortKeyFields: ["createdAt"])
   content: String!
-  username: String!
+  type: String!
+  attachmentUrl: String
+  attachmentType: String
+  isEdited: Boolean
+  author: User @belongsTo(fields: ["authorId"])
+  conversation: Conversation @belongsTo(fields: ["conversationId"])
+  reactions: [MessageReaction] @hasMany(indexName: "byMessage", fields: ["id"])
+  readReceipts: [ReadReceipt] @hasMany(indexName: "byMessage", fields: ["id"])
   createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type MessageReaction @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  messageId: ID! @index(name: "byMessage", sortKeyFields: ["createdAt"])
+  userId: ID!
+  emoji: String!
+  message: Message @belongsTo(fields: ["messageId"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ReadReceipt @model @auth(rules: [{ allow: private }]) {
+  id: ID!
+  messageId: ID! @index(name: "byMessage", sortKeyFields: ["createdAt"])
+  userId: ID!
+  readAt: AWSDateTime!
+  message: Message @belongsTo(fields: ["messageId"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
 }

@@ -19,7 +19,7 @@ export default function HomePage() {
       switch (data.payload.event) {
         case 'signIn':
           setIsAuthenticated(true);
-          router.push('/conversations');
+          router.push('/dashboard');
           break;
         case 'signOut':
           setIsAuthenticated(false);
@@ -36,18 +36,9 @@ export default function HomePage() {
     try {
       await getCurrentUser();
       setIsAuthenticated(true);
-      router.push('/conversations');
+      router.replace('/dashboard');
     } catch {
       setIsAuthenticated(false);
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      setIsAuthenticated(false);
-    } catch (error) {
-      console.error('Error signing out:', error);
     }
   };
 
@@ -60,41 +51,11 @@ export default function HomePage() {
   }
 
   if (isAuthenticated) {
+    // This should never render because checkAuthState will redirect
+    // But just in case, show a loading state
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center px-4">
-        <div className="max-w-md w-full">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome to Chat App
-            </h1>
-            <p className="text-gray-600">
-              Connect and chat in real-time with friends and colleagues
-            </p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-            <h2 className="text-xl font-semibold mb-4">
-              Redirecting to conversations...
-            </h2>
-            <p className="text-gray-600 mb-4">
-              If you're not redirected automatically, click below
-            </p>
-            <button
-              onClick={() => router.push('/conversations')}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg transition-colors mb-4"
-            >
-              Go to Conversations
-            </button>
-            <div className="border-t pt-4">
-              <button
-                onClick={handleSignOut}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                Sign Out
-              </button>
-            </div>
-          </div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary-50 to-primary-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     );
   }

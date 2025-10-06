@@ -6,9 +6,10 @@ import PresenceBadge from './PresenceBadge';
 interface ConversationCardProps {
   conversation: Conversation;
   onClick: () => void;
+  isSelected?: boolean;
 }
 
-export default function ConversationCard({ conversation, onClick }: ConversationCardProps) {
+export default function ConversationCard({ conversation, onClick, isSelected }: ConversationCardProps) {
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -43,7 +44,9 @@ export default function ConversationCard({ conversation, onClick }: Conversation
   return (
     <div
       onClick={onClick}
-      className="flex items-center p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+      className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+        isSelected ? 'bg-gray-100' : ''
+      }`}
     >
       <div className="relative mr-3">
         {conversation.avatar ? (

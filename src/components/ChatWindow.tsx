@@ -47,48 +47,7 @@ export default function ChatWindow({ conversation }: ChatWindowProps) {
 
   const fetchMessages = async () => {
     try {
-      // Mock messages for now
-      const mockMessages: Message[] = [
-        {
-          id: '1',
-          content: 'Hello! How are you doing?',
-          authorId: 'other-user',
-          conversationId: conversation.id,
-          type: MessageType.TEXT,
-          isEdited: false,
-          createdAt: new Date(Date.now() - 60000).toISOString(),
-          updatedAt: new Date(Date.now() - 60000).toISOString(),
-          author: {
-            id: 'other-user',
-            email: 'other@example.com',
-            username: 'otheruser',
-            displayName: 'Other User',
-            isOnline: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-        },
-        {
-          id: '2',
-          content: "I'm doing great! Thanks for asking. How about you?",
-          authorId: currentUserId || 'current-user',
-          conversationId: conversation.id,
-          type: MessageType.TEXT,
-          isEdited: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          author: {
-            id: currentUserId || 'current-user',
-            email: 'current@example.com',
-            username: 'currentuser',
-            displayName: 'You',
-            isOnline: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-        },
-      ];
-      
+      const mockMessages = generateMessagesForConversation(conversation, currentUserId || 'current-user');
       setMessages(mockMessages);
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -281,4 +240,142 @@ export default function ChatWindow({ conversation }: ChatWindowProps) {
       </div>
     </div>
   );
+}
+
+function generateMessagesForConversation(conversation: Conversation, currentUserId: string): Message[] {
+  const baseTime = Date.now();
+  const conversationData: { [key: string]: { otherUser: { name: string; email: string }; messages: Array<{ from: 'me' | 'other'; content: string; minutesAgo: number }> } } = {
+    '1': {
+      otherUser: { name: 'John Doe', email: 'john.doe@example.com' },
+      messages: [
+        { from: 'other', content: 'Hey! Did you finish the project proposal?', minutesAgo: 60 },
+        { from: 'me', content: 'Yes! Just sent it over to the team.', minutesAgo: 58 },
+        { from: 'other', content: 'Awesome, I\'ll review it this afternoon', minutesAgo: 55 },
+        { from: 'me', content: 'Sounds good, let me know if you have any questions', minutesAgo: 50 },
+        { from: 'other', content: 'Will do! Thanks for getting it done so quickly', minutesAgo: 45 },
+      ]
+    },
+    '2': {
+      otherUser: { name: 'Project Team', email: 'project@example.com' },
+      messages: [
+        { from: 'other', content: 'Team meeting at 3pm today', minutesAgo: 120 },
+        { from: 'me', content: 'I\'ll be there!', minutesAgo: 118 },
+        { from: 'other', content: 'Great! We\'ll discuss the Q4 roadmap', minutesAgo: 115 },
+        { from: 'me', content: 'Perfect, I have some ideas to share', minutesAgo: 110 },
+        { from: 'other', content: 'Looking forward to it! Bring the slides if you have them', minutesAgo: 100 },
+        { from: 'me', content: 'Already prepared them. See you at 3!', minutesAgo: 95 },
+      ]
+    },
+    '3': {
+      otherUser: { name: 'Sarah Johnson', email: 'sarah.johnson@example.com' },
+      messages: [
+        { from: 'other', content: 'Hi! How was your weekend?', minutesAgo: 180 },
+        { from: 'me', content: 'It was great! Went hiking. You?', minutesAgo: 175 },
+        { from: 'other', content: 'Nice! I just relaxed at home, watched some movies', minutesAgo: 170 },
+        { from: 'me', content: 'That sounds lovely. Any good recommendations?', minutesAgo: 165 },
+        { from: 'other', content: 'Check out "The Holdovers" - really enjoyed it!', minutesAgo: 160 },
+      ]
+    },
+    '4': {
+      otherUser: { name: 'Design Team', email: 'design@example.com' },
+      messages: [
+        { from: 'other', content: 'New mockups are ready for review', minutesAgo: 300 },
+        { from: 'me', content: 'Excellent! Where can I find them?', minutesAgo: 295 },
+        { from: 'other', content: 'Shared in Figma - link in the project channel', minutesAgo: 290 },
+        { from: 'me', content: 'Got it, reviewing now', minutesAgo: 280 },
+        { from: 'other', content: 'Let us know your thoughts!', minutesAgo: 275 },
+        { from: 'me', content: 'These look amazing! Love the color scheme', minutesAgo: 270 },
+      ]
+    },
+    '5': {
+      otherUser: { name: 'Mike Chen', email: 'mike.chen@example.com' },
+      messages: [
+        { from: 'other', content: 'Want to grab lunch tomorrow?', minutesAgo: 1440 },
+        { from: 'me', content: 'Sure! What time works for you?', minutesAgo: 1430 },
+        { from: 'other', content: 'How about 12:30?', minutesAgo: 1420 },
+        { from: 'me', content: 'Perfect! The usual spot?', minutesAgo: 1410 },
+        { from: 'other', content: 'Yeah, see you there!', minutesAgo: 1400 },
+      ]
+    },
+    '6': {
+      otherUser: { name: 'Marketing Team', email: 'marketing@example.com' },
+      messages: [
+        { from: 'other', content: 'Campaign results are in!', minutesAgo: 2880 },
+        { from: 'me', content: 'How did we do?', minutesAgo: 2870 },
+        { from: 'other', content: '150% above target! 🎉', minutesAgo: 2860 },
+        { from: 'me', content: 'That\'s incredible! Great work everyone!', minutesAgo: 2850 },
+        { from: 'other', content: 'Team effort! Thanks for your support', minutesAgo: 2840 },
+      ]
+    },
+    '7': {
+      otherUser: { name: 'Emily Rodriguez', email: 'emily.rodriguez@example.com' },
+      messages: [
+        { from: 'other', content: 'Can you send me the client contact info?', minutesAgo: 4320 },
+        { from: 'me', content: 'Sure, which client?', minutesAgo: 4310 },
+        { from: 'other', content: 'The one from the morning meeting', minutesAgo: 4300 },
+        { from: 'me', content: 'Got it, sending now', minutesAgo: 4290 },
+        { from: 'other', content: 'Received, thanks!', minutesAgo: 4280 },
+      ]
+    },
+    '8': {
+      otherUser: { name: 'Weekend Plans', email: 'weekend@example.com' },
+      messages: [
+        { from: 'other', content: 'Beach day on Saturday?', minutesAgo: 7200 },
+        { from: 'me', content: 'I\'m in! What time?', minutesAgo: 7150 },
+        { from: 'other', content: 'Let\'s meet at 10am', minutesAgo: 7100 },
+        { from: 'me', content: 'Perfect! I\'ll bring snacks', minutesAgo: 7050 },
+        { from: 'other', content: 'Great! I\'ll handle drinks', minutesAgo: 7000 },
+      ]
+    },
+    '9': {
+      otherUser: { name: 'Alex Kim', email: 'alex.kim@example.com' },
+      messages: [
+        { from: 'other', content: 'Did you see the game last night?', minutesAgo: 8640 },
+        { from: 'me', content: 'Yes! What a finish!', minutesAgo: 8600 },
+        { from: 'other', content: 'I know right! Can\'t believe that last play', minutesAgo: 8560 },
+        { from: 'me', content: 'Best game of the season so far', minutesAgo: 8520 },
+      ]
+    },
+    '10': {
+      otherUser: { name: 'Development Team', email: 'dev@example.com' },
+      messages: [
+        { from: 'other', content: 'Deployment scheduled for Thursday', minutesAgo: 11520 },
+        { from: 'me', content: 'All tests passing?', minutesAgo: 11500 },
+        { from: 'other', content: 'Yes, everything looks good!', minutesAgo: 11480 },
+        { from: 'me', content: 'Excellent work team!', minutesAgo: 11460 },
+        { from: 'other', content: 'Thanks! Ready to ship 🚀', minutesAgo: 11440 },
+      ]
+    },
+  };
+
+  const data = conversationData[conversation.id] || {
+    otherUser: { name: conversation.name || 'Unknown User', email: 'unknown@example.com' },
+    messages: [
+      { from: 'other', content: 'Hello!', minutesAgo: 10 },
+      { from: 'me', content: 'Hi there!', minutesAgo: 5 },
+    ]
+  };
+
+  return data.messages.map((msg, index) => {
+    const isMe = msg.from === 'me';
+    return {
+      id: `${conversation.id}-${index}`,
+      content: msg.content,
+      authorId: isMe ? currentUserId : `user-${conversation.id}`,
+      conversationId: conversation.id,
+      type: MessageType.TEXT,
+      isEdited: false,
+      createdAt: new Date(baseTime - msg.minutesAgo * 60000).toISOString(),
+      updatedAt: new Date(baseTime - msg.minutesAgo * 60000).toISOString(),
+      author: {
+        id: isMe ? currentUserId : `user-${conversation.id}`,
+        email: isMe ? 'chicagomaz13@gmail.com' : data.otherUser.email,
+        username: isMe ? 'chicagomaz13' : data.otherUser.name.toLowerCase().replace(' ', ''),
+        displayName: isMe ? 'You' : data.otherUser.name,
+        isOnline: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    };
+  });
 }
