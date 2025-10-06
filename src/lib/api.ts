@@ -84,20 +84,29 @@ export async function createConversation(
   groupName?: string
 ) {
   try {
+    console.log('Creating conversation with:', { recipientEmail, isGroup, groupName });
+
     // First, find the recipient user by email
     const { data: userData } = (await client.graphql({
       query: queries.getUserByEmail,
       variables: { email: recipientEmail }
     })) as any;
 
+    console.log('User lookup result:', userData);
+
     const recipientUser = userData?.getUserByEmail?.items?.[0];
 
     if (!recipientUser) {
+      console.error('Recipient user not found for email:', recipientEmail);
       throw new Error('Recipient user not found. They must create an account first.');
     }
 
+    console.log('Found recipient user:', recipientUser);
+
     // Create the conversation
     const conversationName = isGroup ? groupName : `Chat with ${recipientUser.displayName || recipientUser.email}`;
+
+    console.log('Creating conversation with name:', conversationName);
 
     const { data: convData } = (await client.graphql({
       query: mutations.createConversation,
@@ -110,19 +119,27 @@ export async function createConversation(
       }
     })) as any;
 
+    console.log('Conversation creation result:', convData);
+
     const newConversation = convData?.createConversation;
 
     if (!newConversation) {
+      console.error('Failed to create conversation - no data returned');
       throw new Error('Failed to create conversation');
     }
+
+    console.log('Created conversation:', newConversation);
 
     // Get current user to add as member
     const { getCurrentUser } = await import('aws-amplify/auth');
     const currentUser = await getCurrentUser();
 
+    console.log('Current user:', currentUser.userId);
+
     // Create conversation member entries for both users
     // Add current user as member
-    await client.graphql({
+    console.log('Adding current user as member...');
+    const currentMemberResult = await client.graphql({
       query: `
         mutation CreateConversationMember($input: CreateConversationMemberInput!) {
           createConversationMember(input: $input) {
@@ -140,9 +157,11 @@ export async function createConversation(
         }
       }
     }) as any;
+    console.log('Current user member created:', currentMemberResult);
 
     // Add recipient as member
-    await client.graphql({
+    console.log('Adding recipient as member...');
+    const recipientMemberResult = await client.graphql({
       query: `
         mutation CreateConversationMember($input: CreateConversationMemberInput!) {
           createConversationMember(input: $input) {
@@ -160,10 +179,17 @@ export async function createConversation(
         }
       }
     }) as any;
+    console.log('Recipient member created:', recipientMemberResult);
 
+    console.log('Conversation creation complete!');
     return newConversation;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating conversation:', error);
+    console.error('Error details:', {
+      message: error.message,
+      errors: error.errors,
+      stack: error.stack
+    });
     throw error;
   }
 }

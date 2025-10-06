@@ -2,11 +2,19 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Authenticator } from '@aws-amplify/ui-react';
+import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react';
 import '@/lib/amplify';
 
-export default function AuthPage() {
+function AuthContent() {
   const router = useRouter();
+  const { user } = useAuthenticator((context) => [context.user]);
+
+  useEffect(() => {
+    if (user) {
+      // User is authenticated, redirect to dashboard
+      router.push('/dashboard');
+    }
+  }, [user, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center px-4">
@@ -25,26 +33,17 @@ export default function AuthPage() {
             variation="modal"
             signUpAttributes={['email']}
             hideSignUp={false}
-          >
-            {({ signOut, user }) => {
-              // Redirect to dashboard after successful authentication
-              useEffect(() => {
-                if (user) {
-                  router.replace('/dashboard');
-                }
-              }, [user]);
-
-              return (
-                <div className="text-center">
-                  <h2 className="text-xl font-semibold mb-4">
-                    Redirecting to dashboard...
-                  </h2>
-                </div>
-              );
-            }}
-          </Authenticator>
+          />
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Authenticator.Provider>
+      <AuthContent />
+    </Authenticator.Provider>
   );
 }
