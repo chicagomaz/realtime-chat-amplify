@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
+import AmplifyProvider from '@/components/AmplifyProvider';
 import '@aws-amplify/ui-react/styles.css';
 import './globals.css';
 
@@ -18,8 +19,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {children}
-        <Toaster position="top-right" />
+        <AmplifyProvider>
+          {children}
+          <Toaster position="top-right" />
+        </AmplifyProvider>
       </body>
     </html>
   );
