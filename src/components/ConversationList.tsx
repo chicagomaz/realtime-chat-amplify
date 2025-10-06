@@ -72,8 +72,9 @@ export default function ConversationList({ onSelectConversation, selectedConvers
 
   // Keep mock data as fallback for development
   const loadMockConversations = () => {
-    const now = new Date();
-    const mockConversations: Conversation[] = [
+    try {
+      const now = new Date();
+      const mockConversations: Conversation[] = [
         {
           id: '1',
           name: 'John Doe',
@@ -165,7 +166,7 @@ export default function ConversationList({ onSelectConversation, selectedConvers
           updatedAt: new Date(now.getTime() - 8 * 24 * 60 * 60000).toISOString(),
         },
       ];
-      
+
       setConversations(mockConversations);
     } catch (error) {
       console.error('Error fetching conversations:', error);
