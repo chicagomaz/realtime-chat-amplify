@@ -9,10 +9,10 @@ export async function getOrCreateUser(email: string, userId: string) {
   try {
     // Try to get user by ID first
     try {
-      const { data } = await client.graphql({
+      const { data } = (await client.graphql({
         query: queries.getUser,
         variables: { id: userId }
-      });
+      })) as any;
       if (data?.getUser) {
         return data.getUser;
       }
@@ -21,7 +21,7 @@ export async function getOrCreateUser(email: string, userId: string) {
     }
 
     // Create new user if doesn't exist
-    const { data } = await client.graphql({
+    const { data } = (await client.graphql({
       query: mutations.createUser,
       variables: {
         input: {
@@ -31,7 +31,7 @@ export async function getOrCreateUser(email: string, userId: string) {
           isOnline: true,
         }
       }
-    });
+    })) as any;
 
     return data?.createUser;
   } catch (error) {
@@ -43,12 +43,12 @@ export async function getOrCreateUser(email: string, userId: string) {
 // Get conversations for current user
 export async function getUserConversations(userId: string) {
   try {
-    const { data } = await client.graphql({
+    const { data } = (await client.graphql({
       query: queries.listConversations,
       variables: {
         limit: 100
       }
-    });
+    })) as any;
 
     return data?.listConversations?.items || [];
   } catch (error) {
@@ -65,10 +65,10 @@ export async function createConversation(
 ) {
   try {
     // First, find the recipient user by email
-    const { data: userData } = await client.graphql({
+    const { data: userData } = (await client.graphql({
       query: queries.getUserByEmail,
       variables: { email: recipientEmail }
-    });
+    })) as any;
 
     const recipientUser = userData?.getUserByEmail?.items?.[0];
 
@@ -78,21 +78,21 @@ export async function createConversation(
 
     // Create conversation using the appropriate mutation
     if (isGroup) {
-      const { data } = await client.graphql({
+      const { data } = (await client.graphql({
         query: mutations.createGroupConversation,
         variables: {
           name: groupName,
           memberIds: [recipientUser.id]
         }
-      });
+      })) as any;
       return data?.createGroupConversation;
     } else {
-      const { data } = await client.graphql({
+      const { data } = (await client.graphql({
         query: mutations.createDirectConversation,
         variables: {
           recipientId: recipientUser.id
         }
-      });
+      })) as any;
       return data?.createDirectConversation;
     }
   } catch (error) {
@@ -104,14 +104,14 @@ export async function createConversation(
 // Get messages for a conversation
 export async function getConversationMessages(conversationId: string) {
   try {
-    const { data } = await client.graphql({
+    const { data } = (await client.graphql({
       query: queries.messagesByConversation,
       variables: {
         conversationId,
         limit: 100,
         sortDirection: 'ASC'
       }
-    });
+    })) as any;
 
     return data?.messagesByConversation?.items || [];
   } catch (error) {
@@ -127,14 +127,14 @@ export async function sendMessageToConversation(
   type: string = 'TEXT'
 ) {
   try {
-    const { data } = await client.graphql({
+    const { data } = (await client.graphql({
       query: mutations.sendMessage,
       variables: {
         conversationId,
         content,
         type
       }
-    });
+    })) as any;
 
     return data?.sendMessage;
   } catch (error) {

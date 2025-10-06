@@ -94,10 +94,10 @@ export default function ChatWindow({ conversation }: ChatWindowProps) {
 
   const setupSubscriptions = () => {
     // Subscribe to new messages in this conversation
-    const subscription = client.graphql({
+    const subscription = (client.graphql({
       query: subscriptions.onCreateMessage,
       variables: { conversationId: conversation.id }
-    }).subscribe({
+    }) as any).subscribe({
       next: ({ data }: any) => {
         const newMessage = data.onCreateMessage;
         if (newMessage && newMessage.authorId !== currentUserId) {
