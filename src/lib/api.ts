@@ -7,20 +7,28 @@ const client = generateClient();
 // Helper function to get or create user
 export async function getOrCreateUser(email: string, userId: string) {
   try {
+    console.log('getOrCreateUser called with:', { email, userId });
+
     // Try to get user by ID first
     try {
+      console.log('Attempting to get existing user...');
       const { data } = (await client.graphql({
         query: queries.getUser,
         variables: { id: userId }
       })) as any;
+      console.log('getUser result:', data);
+
       if (data?.getUser) {
+        console.log('Found existing user:', data.getUser);
         return data.getUser;
       }
-    } catch (e) {
+    } catch (e: any) {
+      console.log('User lookup error (will create new):', e.message);
       // User doesn't exist, will create below
     }
 
     // Create new user if doesn't exist
+    console.log('Creating new user...');
     const { data } = (await client.graphql({
       query: mutations.createUser,
       variables: {
@@ -33,9 +41,12 @@ export async function getOrCreateUser(email: string, userId: string) {
       }
     })) as any;
 
+    console.log('createUser result:', data);
     return data?.createUser;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting or creating user:', error);
+    console.error('Error message:', error.message);
+    console.error('Error errors array:', error.errors);
     throw error;
   }
 }

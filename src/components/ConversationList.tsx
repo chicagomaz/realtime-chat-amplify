@@ -26,18 +26,27 @@ export default function ConversationList({ onSelectConversation, selectedConvers
 
   const initializeData = async () => {
     try {
+      console.log('Initializing conversation list...');
       const user = await getCurrentUser();
+      console.log('Got current user:', user.userId);
+
       const userAttributes = await fetchUserAttributes();
+      console.log('Got user attributes:', userAttributes);
       setCurrentUserId(user.userId);
 
       // Ensure user exists in database
       if (userAttributes.email) {
+        console.log('Creating/getting user in database...');
         await getOrCreateUser(userAttributes.email, user.userId);
+        console.log('User created/retrieved successfully');
       }
 
       await fetchConversations(user.userId);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error initializing data:', error);
+      console.error('Error message:', error.message);
+      console.error('Error details:', error.errors);
+      console.error('Full error:', JSON.stringify(error, null, 2));
     } finally {
       setLoading(false);
     }
