@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// this is an auto-generated file. This will be overwritten
+// this is an auto generated file. This will be overwritten
 
 export const getUser = /* GraphQL */ `
   query GetUser($id: ID!) {
@@ -10,17 +10,11 @@ export const getUser = /* GraphQL */ `
       username
       displayName
       avatar
-      bio
       isOnline
-      lastSeen
+      lastSeenAt
       createdAt
       updatedAt
-      conversations {
-        nextToken
-      }
-      sentMessages {
-        nextToken
-      }
+      __typename
     }
   }
 `;
@@ -38,13 +32,47 @@ export const listUsers = /* GraphQL */ `
         username
         displayName
         avatar
-        bio
         isOnline
-        lastSeen
+        lastSeenAt
         createdAt
         updatedAt
+        __typename
       }
       nextToken
+      __typename
+    }
+  }
+`;
+
+export const getUserByEmail = /* GraphQL */ `
+  query GetUserByEmail(
+    $email: String!
+    $sortDirection: ModelSortDirection
+    $filter: ModelUserFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    getUserByEmail(
+      email: $email
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        email
+        username
+        displayName
+        avatar
+        isOnline
+        lastSeenAt
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
     }
   }
 `;
@@ -54,22 +82,12 @@ export const getConversation = /* GraphQL */ `
     getConversation(id: $id) {
       id
       name
-      description
-      type
       isGroup
       avatar
       lastMessageAt
       createdAt
       updatedAt
-      members {
-        nextToken
-      }
-      messages {
-        nextToken
-      }
-      typingUsers {
-        nextToken
-      }
+      __typename
     }
   }
 `;
@@ -84,15 +102,15 @@ export const listConversations = /* GraphQL */ `
       items {
         id
         name
-        description
-        type
         isGroup
         avatar
         lastMessageAt
         createdAt
         updatedAt
+        __typename
       }
       nextToken
+      __typename
     }
   }
 `;
@@ -101,62 +119,23 @@ export const getMessage = /* GraphQL */ `
   query GetMessage($id: ID!) {
     getMessage(id: $id) {
       id
-      content
-      authorId
       conversationId
+      authorId
+      content
       type
       attachmentUrl
       attachmentType
-      attachmentSize
-      replyToId
       isEdited
-      editedAt
       createdAt
       updatedAt
       author {
         id
         email
-        username
         displayName
         avatar
-        bio
-        isOnline
-        lastSeen
-        createdAt
-        updatedAt
+        __typename
       }
-      conversation {
-        id
-        name
-        description
-        type
-        isGroup
-        avatar
-        lastMessageAt
-        createdAt
-        updatedAt
-      }
-      replyTo {
-        id
-        content
-        authorId
-        conversationId
-        type
-        attachmentUrl
-        attachmentType
-        attachmentSize
-        replyToId
-        isEdited
-        editedAt
-        createdAt
-        updatedAt
-      }
-      reactions {
-        nextToken
-      }
-      readReceipts {
-        nextToken
-      }
+      __typename
     }
   }
 `;
@@ -170,94 +149,62 @@ export const listMessages = /* GraphQL */ `
     listMessages(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        content
-        authorId
         conversationId
+        authorId
+        content
         type
         attachmentUrl
         attachmentType
-        attachmentSize
-        replyToId
         isEdited
-        editedAt
         createdAt
         updatedAt
+        __typename
       }
       nextToken
+      __typename
     }
   }
 `;
 
-export const getConversationsForUser = /* GraphQL */ `
-  query GetConversationsForUser($userId: ID!) {
-    getConversationsForUser(userId: $userId) {
-      id
-      name
-      description
-      type
-      isGroup
-      avatar
-      lastMessageAt
-      createdAt
-      updatedAt
-      members {
-        nextToken
-      }
-      messages {
-        nextToken
-      }
-      typingUsers {
-        nextToken
-      }
-    }
-  }
-`;
-
-export const getMessagesForConversation = /* GraphQL */ `
-  query GetMessagesForConversation(
+export const messagesByConversation = /* GraphQL */ `
+  query MessagesByConversation(
     $conversationId: ID!
+    $createdAt: ModelStringKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelMessageFilterInput
     $limit: Int
     $nextToken: String
   ) {
-    getMessagesForConversation(
+    messagesByConversation(
       conversationId: $conversationId
+      createdAt: $createdAt
+      sortDirection: $sortDirection
+      filter: $filter
       limit: $limit
       nextToken: $nextToken
     ) {
       items {
         id
-        content
-        authorId
         conversationId
+        authorId
+        content
         type
         attachmentUrl
         attachmentType
-        attachmentSize
-        replyToId
         isEdited
-        editedAt
         createdAt
         updatedAt
         author {
           id
           email
-          username
           displayName
           avatar
-          bio
-          isOnline
-          lastSeen
-          createdAt
-          updatedAt
+          __typename
         }
-        reactions {
-          nextToken
-        }
-        readReceipts {
-          nextToken
-        }
+        __typename
       }
       nextToken
+      __typename
     }
   }
 `;

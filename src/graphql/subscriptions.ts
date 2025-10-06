@@ -1,196 +1,132 @@
 /* tslint:disable */
 /* eslint-disable */
-// this is an auto-generated file. This will be overwritten
+// this is an auto generated file. This will be overwritten
 
-export const onMessageAdded = /* GraphQL */ `
-  subscription OnMessageAdded($conversationId: ID!) {
-    onMessageAdded(conversationId: $conversationId) {
+export const onCreateMessage = /* GraphQL */ `
+  subscription OnCreateMessage($filter: ModelSubscriptionMessageFilterInput) {
+    onCreateMessage(filter: $filter) {
       id
-      content
-      authorId
       conversationId
+      authorId
+      content
       type
       attachmentUrl
       attachmentType
-      attachmentSize
-      replyToId
       isEdited
-      editedAt
       createdAt
       updatedAt
       author {
         id
         email
-        username
         displayName
         avatar
-        bio
-        isOnline
-        lastSeen
-        createdAt
-        updatedAt
+        __typename
       }
-      conversation {
-        id
-        name
-        description
-        type
-        isGroup
-        avatar
-        lastMessageAt
-        createdAt
-        updatedAt
-      }
-      replyTo {
-        id
-        content
-        authorId
-        conversationId
-        type
-        attachmentUrl
-        attachmentType
-        attachmentSize
-        replyToId
-        isEdited
-        editedAt
-        createdAt
-        updatedAt
-      }
-      reactions {
-        nextToken
-      }
-      readReceipts {
-        nextToken
-      }
+      __typename
     }
   }
 `;
 
-export const onMessageReactionAdded = /* GraphQL */ `
-  subscription OnMessageReactionAdded($messageId: ID!) {
-    onMessageReactionAdded(messageId: $messageId) {
-      id
-      messageId
-      userId
-      emoji
-      createdAt
-      message {
-        id
-        content
-        authorId
-        conversationId
-        type
-        attachmentUrl
-        attachmentType
-        attachmentSize
-        replyToId
-        isEdited
-        editedAt
-        createdAt
-        updatedAt
-      }
-      user {
-        id
-        email
-        username
-        displayName
-        avatar
-        bio
-        isOnline
-        lastSeen
-        createdAt
-        updatedAt
-      }
-    }
-  }
-`;
-
-export const onTypingUpdated = /* GraphQL */ `
-  subscription OnTypingUpdated($conversationId: ID!) {
-    onTypingUpdated(conversationId: $conversationId) {
+export const onUpdateMessage = /* GraphQL */ `
+  subscription OnUpdateMessage($filter: ModelSubscriptionMessageFilterInput) {
+    onUpdateMessage(filter: $filter) {
       id
       conversationId
-      userId
-      isTyping
+      authorId
+      content
+      type
+      attachmentUrl
+      attachmentType
+      isEdited
+      createdAt
       updatedAt
-      conversation {
-        id
-        name
-        description
-        type
-        isGroup
-        avatar
-        lastMessageAt
-        createdAt
-        updatedAt
-      }
-      user {
+      author {
         id
         email
-        username
         displayName
         avatar
-        bio
-        isOnline
-        lastSeen
-        createdAt
-        updatedAt
+        __typename
       }
+      __typename
     }
   }
 `;
 
-export const onUserPresenceUpdated = /* GraphQL */ `
-  subscription OnUserPresenceUpdated($userId: ID!) {
-    onUserPresenceUpdated(userId: $userId) {
+export const onDeleteMessage = /* GraphQL */ `
+  subscription OnDeleteMessage($filter: ModelSubscriptionMessageFilterInput) {
+    onDeleteMessage(filter: $filter) {
+      id
+      conversationId
+      authorId
+      content
+      type
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+
+export const onCreateUser = /* GraphQL */ `
+  subscription OnCreateUser($filter: ModelSubscriptionUserFilterInput) {
+    onCreateUser(filter: $filter) {
       id
       email
       username
       displayName
       avatar
-      bio
       isOnline
-      lastSeen
+      lastSeenAt
       createdAt
       updatedAt
+      __typename
     }
   }
 `;
 
-export const onReadReceiptAdded = /* GraphQL */ `
-  subscription OnReadReceiptAdded($messageId: ID!) {
-    onReadReceiptAdded(messageId: $messageId) {
+export const onUpdateUser = /* GraphQL */ `
+  subscription OnUpdateUser($filter: ModelSubscriptionUserFilterInput) {
+    onUpdateUser(filter: $filter) {
       id
-      messageId
-      userId
-      readAt
-      message {
-        id
-        content
-        authorId
-        conversationId
-        type
-        attachmentUrl
-        attachmentType
-        attachmentSize
-        replyToId
-        isEdited
-        editedAt
-        createdAt
-        updatedAt
-      }
-      user {
-        id
-        email
-        username
-        displayName
-        avatar
-        bio
-        isOnline
-        lastSeen
-        createdAt
-        updatedAt
-      }
+      email
+      username
+      displayName
+      avatar
+      isOnline
+      lastSeenAt
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+
+export const onCreateConversation = /* GraphQL */ `
+  subscription OnCreateConversation($filter: ModelSubscriptionConversationFilterInput) {
+    onCreateConversation(filter: $filter) {
+      id
+      name
+      isGroup
+      avatar
+      lastMessageAt
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+
+export const onUpdateConversation = /* GraphQL */ `
+  subscription OnUpdateConversation($filter: ModelSubscriptionConversationFilterInput) {
+    onUpdateConversation(filter: $filter) {
+      id
+      name
+      isGroup
+      avatar
+      lastMessageAt
+      createdAt
+      updatedAt
+      __typename
     }
   }
 `;

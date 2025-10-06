@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-// this is an auto-generated file. This will be overwritten
+// this is an auto generated file. This will be overwritten
 
 export const createUser = /* GraphQL */ `
   mutation CreateUser(
@@ -13,11 +13,11 @@ export const createUser = /* GraphQL */ `
       username
       displayName
       avatar
-      bio
       isOnline
-      lastSeen
+      lastSeenAt
       createdAt
       updatedAt
+      __typename
     }
   }
 `;
@@ -33,11 +33,41 @@ export const updateUser = /* GraphQL */ `
       username
       displayName
       avatar
-      bio
       isOnline
-      lastSeen
+      lastSeenAt
       createdAt
       updatedAt
+      __typename
+    }
+  }
+`;
+
+export const deleteUser = /* GraphQL */ `
+  mutation DeleteUser(
+    $input: DeleteUserInput!
+    $condition: ModelUserConditionInput
+  ) {
+    deleteUser(input: $input, condition: $condition) {
+      id
+      __typename
+    }
+  }
+`;
+
+export const createConversation = /* GraphQL */ `
+  mutation CreateConversation(
+    $input: CreateConversationInput!
+    $condition: ModelConversationConditionInput
+  ) {
+    createConversation(input: $input, condition: $condition) {
+      id
+      name
+      isGroup
+      avatar
+      lastMessageAt
+      createdAt
+      updatedAt
+      __typename
     }
   }
 `;
@@ -47,22 +77,12 @@ export const createDirectConversation = /* GraphQL */ `
     createDirectConversation(recipientId: $recipientId) {
       id
       name
-      description
-      type
       isGroup
       avatar
       lastMessageAt
       createdAt
       updatedAt
-      members {
-        nextToken
-      }
-      messages {
-        nextToken
-      }
-      typingUsers {
-        nextToken
-      }
+      __typename
     }
   }
 `;
@@ -72,253 +92,98 @@ export const createGroupConversation = /* GraphQL */ `
     createGroupConversation(name: $name, memberIds: $memberIds) {
       id
       name
-      description
-      type
       isGroup
       avatar
       lastMessageAt
       createdAt
       updatedAt
-      members {
-        nextToken
-      }
-      messages {
-        nextToken
-      }
-      typingUsers {
-        nextToken
-      }
+      __typename
     }
   }
 `;
 
-export const sendMessage = /* GraphQL */ `
-  mutation SendMessage(
-    $conversationId: ID!
-    $content: String
-    $type: MessageType!
-    $attachmentUrl: String
-    $attachmentType: AttachmentType
-    $replyToId: ID
+export const createMessage = /* GraphQL */ `
+  mutation CreateMessage(
+    $input: CreateMessageInput!
+    $condition: ModelMessageConditionInput
   ) {
-    sendMessage(
-      conversationId: $conversationId
-      content: $content
-      type: $type
-      attachmentUrl: $attachmentUrl
-      attachmentType: $attachmentType
-      replyToId: $replyToId
-    ) {
+    createMessage(input: $input, condition: $condition) {
       id
-      content
-      authorId
       conversationId
+      authorId
+      content
       type
       attachmentUrl
       attachmentType
-      attachmentSize
-      replyToId
       isEdited
-      editedAt
       createdAt
       updatedAt
       author {
         id
         email
-        username
         displayName
         avatar
-        bio
-        isOnline
-        lastSeen
-        createdAt
-        updatedAt
+        __typename
       }
-      conversation {
-        id
-        name
-        description
-        type
-        isGroup
-        avatar
-        lastMessageAt
-        createdAt
-        updatedAt
-      }
-      replyTo {
-        id
-        content
-        authorId
-        conversationId
-        type
-        attachmentUrl
-        attachmentType
-        attachmentSize
-        replyToId
-        isEdited
-        editedAt
-        createdAt
-        updatedAt
-      }
-      reactions {
-        nextToken
-      }
-      readReceipts {
-        nextToken
-      }
+      __typename
     }
   }
 `;
 
-export const addReaction = /* GraphQL */ `
-  mutation AddReaction($messageId: ID!, $emoji: String!) {
-    addReaction(messageId: $messageId, emoji: $emoji) {
-      id
-      messageId
-      userId
-      emoji
-      createdAt
-      message {
-        id
-        content
-        authorId
-        conversationId
-        type
-        attachmentUrl
-        attachmentType
-        attachmentSize
-        replyToId
-        isEdited
-        editedAt
-        createdAt
-        updatedAt
-      }
-      user {
-        id
-        email
-        username
-        displayName
-        avatar
-        bio
-        isOnline
-        lastSeen
-        createdAt
-        updatedAt
-      }
-    }
-  }
-`;
-
-export const removeReaction = /* GraphQL */ `
-  mutation RemoveReaction($messageId: ID!, $emoji: String!) {
-    removeReaction(messageId: $messageId, emoji: $emoji)
-  }
-`;
-
-export const markMessageAsRead = /* GraphQL */ `
-  mutation MarkMessageAsRead($messageId: ID!) {
-    markMessageAsRead(messageId: $messageId) {
-      id
-      messageId
-      userId
-      readAt
-      message {
-        id
-        content
-        authorId
-        conversationId
-        type
-        attachmentUrl
-        attachmentType
-        attachmentSize
-        replyToId
-        isEdited
-        editedAt
-        createdAt
-        updatedAt
-      }
-      user {
-        id
-        email
-        username
-        displayName
-        avatar
-        bio
-        isOnline
-        lastSeen
-        createdAt
-        updatedAt
-      }
-    }
-  }
-`;
-
-export const updateTypingStatus = /* GraphQL */ `
-  mutation UpdateTypingStatus($conversationId: ID!, $isTyping: Boolean!) {
-    updateTypingStatus(conversationId: $conversationId, isTyping: $isTyping) {
+export const sendMessage = /* GraphQL */ `
+  mutation SendMessage($conversationId: ID!, $content: String!, $type: String!) {
+    sendMessage(conversationId: $conversationId, content: $content, type: $type) {
       id
       conversationId
-      userId
-      isTyping
-      updatedAt
-      conversation {
-        id
-        name
-        description
-        type
-        isGroup
-        avatar
-        lastMessageAt
-        createdAt
-        updatedAt
-      }
-      user {
-        id
-        email
-        username
-        displayName
-        avatar
-        bio
-        isOnline
-        lastSeen
-        createdAt
-        updatedAt
-      }
-    }
-  }
-`;
-
-export const updateUserPresence = /* GraphQL */ `
-  mutation UpdateUserPresence($isOnline: Boolean!) {
-    updateUserPresence(isOnline: $isOnline) {
-      id
-      email
-      username
-      displayName
-      avatar
-      bio
-      isOnline
-      lastSeen
+      authorId
+      content
+      type
+      attachmentUrl
+      attachmentType
+      isEdited
       createdAt
       updatedAt
+      author {
+        id
+        email
+        displayName
+        avatar
+        __typename
+      }
+      __typename
     }
   }
 `;
 
-export const generatePresignedUploadUrl = /* GraphQL */ `
-  mutation GeneratePresignedUploadUrl(
-    $fileName: String!
-    $fileType: String!
-    $fileSize: Int!
+export const updateMessage = /* GraphQL */ `
+  mutation UpdateMessage(
+    $input: UpdateMessageInput!
+    $condition: ModelMessageConditionInput
   ) {
-    generatePresignedUploadUrl(
-      fileName: $fileName
-      fileType: $fileType
-      fileSize: $fileSize
-    ) {
-      uploadUrl
-      downloadUrl
-      key
+    updateMessage(input: $input, condition: $condition) {
+      id
+      conversationId
+      authorId
+      content
+      type
+      attachmentUrl
+      attachmentType
+      isEdited
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+
+export const deleteMessage = /* GraphQL */ `
+  mutation DeleteMessage(
+    $input: DeleteMessageInput!
+    $condition: ModelMessageConditionInput
+  ) {
+    deleteMessage(input: $input, condition: $condition) {
+      id
+      __typename
     }
   }
 `;
