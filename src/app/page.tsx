@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getCurrentUser } from 'aws-amplify/auth';
+import { useRouter } from 'next/navigation';
+import { getCurrentUser, signOut } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
-import ConversationList from '@/components/ConversationList';
-import AuthPage from './auth/page';
+import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
 import '@/lib/amplify';
 
 export default function HomePage() {
+  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -17,6 +19,7 @@ export default function HomePage() {
       switch (data.payload.event) {
         case 'signIn':
           setIsAuthenticated(true);
+          router.push('/conversations');
           break;
         case 'signOut':
           setIsAuthenticated(false);
@@ -27,32 +30,95 @@ export default function HomePage() {
     const unsubscribe = Hub.listen('auth', hubListener);
 
     return unsubscribe;
-  }, []);
+  }, [router]);
 
   const checkAuthState = async () => {
     try {
       await getCurrentUser();
       setIsAuthenticated(true);
+      router.push('/conversations');
     } catch {
       setIsAuthenticated(false);
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   if (isAuthenticated === null) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary-50 to-primary-100">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return <AuthPage />;
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center px-4">
+        <div className="max-w-md w-full">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Welcome to Chat App
+            </h1>
+            <p className="text-gray-600">
+              Connect and chat in real-time with friends and colleagues
+            </p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-6 text-center">
+            <h2 className="text-xl font-semibold mb-4">
+              Redirecting to conversations...
+            </h2>
+            <p className="text-gray-600 mb-4">
+              If you're not redirected automatically, click below
+            </p>
+            <button
+              onClick={() => router.push('/conversations')}
+              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg transition-colors mb-4"
+            >
+              Go to Conversations
+            </button>
+            <div className="border-t pt-4">
+              <button
+                onClick={handleSignOut}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="h-screen bg-gray-50">
-      <ConversationList />
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center px-4">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Welcome to Chat App
+          </h1>
+          <p className="text-gray-600">
+            Connect and chat in real-time with friends and colleagues
+          </p>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <Authenticator
+            variation="modal"
+            signUpAttributes={['email']}
+            hideSignUp={false}
+          />
+        </div>
+      </div>
     </div>
   );
 }
