@@ -43,14 +43,34 @@ export async function getOrCreateUser(email: string, userId: string) {
 // Get conversations for current user
 export async function getUserConversations(userId: string) {
   try {
-    const { data } = (await client.graphql({
-      query: queries.listConversations,
-      variables: {
-        limit: 100
-      }
+    // Query ConversationMember records for this user to find their conversations
+    const { data: memberData } = (await client.graphql({
+      query: `
+        query GetUserConversationMembers($userId: ID!) {
+          listConversationMembers(filter: { userId: { eq: $userId }, isActive: { eq: true } }, limit: 100) {
+            items {
+              conversationId
+              conversation {
+                id
+                name
+                isGroup
+                avatar
+                lastMessageAt
+                createdAt
+                updatedAt
+              }
+            }
+          }
+        }
+      `,
+      variables: { userId }
     })) as any;
 
-    return data?.listConversations?.items || [];
+    const conversations = memberData?.listConversationMembers?.items
+      ?.map((member: any) => member.conversation)
+      ?.filter((conv: any) => conv != null) || [];
+
+    return conversations;
   } catch (error) {
     console.error('Error fetching conversations:', error);
     return [];
@@ -76,25 +96,72 @@ export async function createConversation(
       throw new Error('Recipient user not found. They must create an account first.');
     }
 
-    // Create conversation using the appropriate mutation
-    if (isGroup) {
-      const { data } = (await client.graphql({
-        query: mutations.createGroupConversation,
-        variables: {
-          name: groupName,
-          memberIds: [recipientUser.id]
+    // Create the conversation
+    const conversationName = isGroup ? groupName : `Chat with ${recipientUser.displayName || recipientUser.email}`;
+
+    const { data: convData } = (await client.graphql({
+      query: mutations.createConversation,
+      variables: {
+        input: {
+          name: conversationName,
+          isGroup: isGroup,
+          lastMessageAt: new Date().toISOString()
         }
-      })) as any;
-      return data?.createGroupConversation;
-    } else {
-      const { data } = (await client.graphql({
-        query: mutations.createDirectConversation,
-        variables: {
-          recipientId: recipientUser.id
-        }
-      })) as any;
-      return data?.createDirectConversation;
+      }
+    })) as any;
+
+    const newConversation = convData?.createConversation;
+
+    if (!newConversation) {
+      throw new Error('Failed to create conversation');
     }
+
+    // Get current user to add as member
+    const { getCurrentUser } = await import('aws-amplify/auth');
+    const currentUser = await getCurrentUser();
+
+    // Create conversation member entries for both users
+    // Add current user as member
+    await client.graphql({
+      query: `
+        mutation CreateConversationMember($input: CreateConversationMemberInput!) {
+          createConversationMember(input: $input) {
+            id
+          }
+        }
+      `,
+      variables: {
+        input: {
+          userId: currentUser.userId,
+          conversationId: newConversation.id,
+          role: 'MEMBER',
+          joinedAt: new Date().toISOString(),
+          isActive: true
+        }
+      }
+    }) as any;
+
+    // Add recipient as member
+    await client.graphql({
+      query: `
+        mutation CreateConversationMember($input: CreateConversationMemberInput!) {
+          createConversationMember(input: $input) {
+            id
+          }
+        }
+      `,
+      variables: {
+        input: {
+          userId: recipientUser.id,
+          conversationId: newConversation.id,
+          role: 'MEMBER',
+          joinedAt: new Date().toISOString(),
+          isActive: true
+        }
+      }
+    }) as any;
+
+    return newConversation;
   } catch (error) {
     console.error('Error creating conversation:', error);
     throw error;
