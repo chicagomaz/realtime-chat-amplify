@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { PlusIcon, UserIcon } from '@heroicons/react/24/outline';
 import ConversationCard from './ConversationCard';
 import { Conversation, ConversationType } from '@/types';
-import { client } from '@/lib/amplify';
-import { getCurrentUser } from 'aws-amplify/auth';
+import { getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
+import { getUserConversations, createConversation as createConversationAPI, getOrCreateUser } from '@/lib/api';
 
 interface ConversationListProps {
   onSelectConversation?: (conversation: Conversation) => void;
@@ -27,8 +27,15 @@ export default function ConversationList({ onSelectConversation, selectedConvers
   const initializeData = async () => {
     try {
       const user = await getCurrentUser();
+      const userAttributes = await fetchUserAttributes();
       setCurrentUserId(user.userId);
-      await fetchConversations();
+
+      // Ensure user exists in database
+      if (userAttributes.email) {
+        await getOrCreateUser(userAttributes.email, user.userId);
+      }
+
+      await fetchConversations(user.userId);
     } catch (error) {
       console.error('Error initializing data:', error);
     } finally {
@@ -36,17 +43,37 @@ export default function ConversationList({ onSelectConversation, selectedConvers
     }
   };
 
-  const fetchConversations = async () => {
+  const fetchConversations = async (userId?: string) => {
     try {
-      // This would be replaced with actual GraphQL query
-      // const result = await client.graphql({
-      //   query: getConversationsForUser,
-      //   variables: { userId: currentUserId },
-      // });
-      
-      // Mock data for now
-      const now = new Date();
-      const mockConversations: Conversation[] = [
+      const userIdToUse = userId || currentUserId;
+      if (!userIdToUse) return;
+
+      const realConversations = await getUserConversations(userIdToUse);
+
+      // Map backend data to frontend Conversation type
+      const mappedConversations: Conversation[] = realConversations.map((conv: any) => ({
+        id: conv.id,
+        name: conv.name || 'Unnamed',
+        type: conv.isGroup ? ConversationType.GROUP : ConversationType.DIRECT,
+        isGroup: conv.isGroup || false,
+        lastMessageAt: conv.lastMessageAt || conv.createdAt,
+        createdAt: conv.createdAt,
+        updatedAt: conv.updatedAt,
+        avatar: conv.avatar,
+      }));
+
+      setConversations(mappedConversations);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+      // Fallback to empty array on error
+      setConversations([]);
+    }
+  };
+
+  // Keep mock data as fallback for development
+  const loadMockConversations = () => {
+    const now = new Date();
+    const mockConversations: Conversation[] = [
         {
           id: '1',
           name: 'John Doe',
@@ -154,21 +181,33 @@ export default function ConversationList({ onSelectConversation, selectedConvers
   };
 
   const handleCreateNewConversation = async (recipientEmail: string, isGroup: boolean, groupName?: string) => {
-    // This would make an API call to create a new conversation
-    // For now, we'll create a mock conversation
-    const newConversation: Conversation = {
-      id: String(conversations.length + 3),
-      name: isGroup ? groupName : recipientEmail,
-      type: isGroup ? ConversationType.GROUP : ConversationType.DIRECT,
-      isGroup,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      lastMessageAt: new Date().toISOString(),
-    };
+    try {
+      // Call backend API to create conversation
+      const newConv = await createConversationAPI(recipientEmail, isGroup, groupName);
 
-    setConversations([newConversation, ...conversations]);
-    setShowNewMessageModal(false);
-    onSelectConversation?.(newConversation);
+      if (!newConv) {
+        throw new Error('Failed to create conversation');
+      }
+
+      // Map to Conversation type
+      const newConversation: Conversation = {
+        id: newConv.id,
+        name: newConv.name || recipientEmail,
+        type: isGroup ? ConversationType.GROUP : ConversationType.DIRECT,
+        isGroup: newConv.isGroup || isGroup,
+        createdAt: newConv.createdAt,
+        updatedAt: newConv.updatedAt,
+        lastMessageAt: newConv.lastMessageAt || newConv.createdAt,
+      };
+
+      // Add to local state
+      setConversations([newConversation, ...conversations]);
+      setShowNewMessageModal(false);
+      onSelectConversation?.(newConversation);
+    } catch (error: any) {
+      console.error('Error creating conversation:', error);
+      alert(error.message || 'Failed to create conversation. Please try again.');
+    }
   };
 
   if (loading) {

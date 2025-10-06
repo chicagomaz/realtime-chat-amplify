@@ -13,7 +13,7 @@ export async function getOrCreateUser(email: string, userId: string) {
         query: queries.getUser,
         variables: { id: userId }
       });
-      if (data.getUser) {
+      if (data?.getUser) {
         return data.getUser;
       }
     } catch (e) {
@@ -33,7 +33,7 @@ export async function getOrCreateUser(email: string, userId: string) {
       }
     });
 
-    return data.createUser;
+    return data?.createUser;
   } catch (error) {
     console.error('Error getting or creating user:', error);
     throw error;
@@ -43,79 +43,58 @@ export async function getOrCreateUser(email: string, userId: string) {
 // Get conversations for current user
 export async function getUserConversations(userId: string) {
   try {
-    const { data: members } = await client.models.ConversationMember.list({
-      filter: { userId: { eq: userId }, isActive: { eq: true} }
+    const { data } = await client.graphql({
+      query: queries.listConversations,
+      variables: {
+        limit: 100
+      }
     });
 
-    if (!members) return [];
-
-    // Get full conversation details for each membership
-    const conversations = await Promise.all(
-      members.map(async (member) => {
-        if (!member.conversationId) return null;
-        const { data: conversation } = await client.models.Conversation.get({
-          id: member.conversationId
-        });
-        return conversation;
-      })
-    );
-
-    return conversations.filter(c => c !== null);
+    return data?.listConversations?.items || [];
   } catch (error) {
     console.error('Error fetching conversations:', error);
     return [];
   }
 }
 
-// Create a new conversation
+// Create a new conversation with a user by email
 export async function createConversation(
-  currentUserId: string,
   recipientEmail: string,
   isGroup: boolean,
   groupName?: string
 ) {
   try {
-    // Find recipient user
-    const { data: users } = await client.models.User.list({
-      filter: { email: { eq: recipientEmail } }
+    // First, find the recipient user by email
+    const { data: userData } = await client.graphql({
+      query: queries.getUserByEmail,
+      variables: { email: recipientEmail }
     });
 
-    if (!users || users.length === 0) {
-      throw new Error('Recipient user not found');
+    const recipientUser = userData?.getUserByEmail?.items?.[0];
+
+    if (!recipientUser) {
+      throw new Error('Recipient user not found. They must create an account first.');
     }
 
-    const recipientUser = users[0];
-
-    // Create conversation
-    const { data: conversation } = await client.models.Conversation.create({
-      name: isGroup ? groupName : recipientUser.displayName,
-      isGroup,
-      lastMessageAt: new Date().toISOString(),
-    });
-
-    if (!conversation) {
-      throw new Error('Failed to create conversation');
+    // Create conversation using the appropriate mutation
+    if (isGroup) {
+      const { data } = await client.graphql({
+        query: mutations.createGroupConversation,
+        variables: {
+          name: groupName,
+          memberIds: [recipientUser.id]
+        }
+      });
+      return data?.createGroupConversation;
+    } else {
+      const { data } = await client.graphql({
+        query: mutations.createDirectConversation,
+        variables: {
+          recipientId: recipientUser.id
+        }
+      });
+      return data?.createDirectConversation;
     }
-
-    // Add current user as member
-    await client.models.ConversationMember.create({
-      userId: currentUserId,
-      conversationId: conversation.id,
-      role: 'ADMIN',
-      joinedAt: new Date().toISOString(),
-      isActive: true,
-    });
-
-    // Add recipient as member
-    await client.models.ConversationMember.create({
-      userId: recipientUser.id,
-      conversationId: conversation.id,
-      role: 'MEMBER',
-      joinedAt: new Date().toISOString(),
-      isActive: true,
-    });
-
-    return conversation;
   } catch (error) {
     console.error('Error creating conversation:', error);
     throw error;
@@ -125,12 +104,16 @@ export async function createConversation(
 // Get messages for a conversation
 export async function getConversationMessages(conversationId: string) {
   try {
-    const { data: messages } = await client.models.Message.list({
-      filter: { conversationId: { eq: conversationId } },
-      limit: 100
+    const { data } = await client.graphql({
+      query: queries.messagesByConversation,
+      variables: {
+        conversationId,
+        limit: 100,
+        sortDirection: 'ASC'
+      }
     });
 
-    return messages || [];
+    return data?.messagesByConversation?.items || [];
   } catch (error) {
     console.error('Error fetching messages:', error);
     return [];
@@ -138,28 +121,22 @@ export async function getConversationMessages(conversationId: string) {
 }
 
 // Send a message
-export async function sendMessage(
+export async function sendMessageToConversation(
   conversationId: string,
-  authorId: string,
   content: string,
   type: string = 'TEXT'
 ) {
   try {
-    const { data: message } = await client.models.Message.create({
-      conversationId,
-      authorId,
-      content,
-      type,
-      isEdited: false,
+    const { data } = await client.graphql({
+      query: mutations.sendMessage,
+      variables: {
+        conversationId,
+        content,
+        type
+      }
     });
 
-    // Update conversation's lastMessageAt
-    await client.models.Conversation.update({
-      id: conversationId,
-      lastMessageAt: new Date().toISOString(),
-    });
-
-    return message;
+    return data?.sendMessage;
   } catch (error) {
     console.error('Error sending message:', error);
     throw error;

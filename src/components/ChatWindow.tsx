@@ -6,9 +6,13 @@ import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
 import AttachmentUploader from './AttachmentUploader';
 import { Conversation, Message, MessageType } from '@/types';
-import { client } from '@/lib/amplify';
-import { getCurrentUser } from 'aws-amplify/auth';
+import { getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
+import { getConversationMessages, sendMessageToConversation, getOrCreateUser } from '@/lib/api';
+import { generateClient } from 'aws-amplify/api';
+import * as subscriptions from '@/graphql/subscriptions';
 import toast from 'react-hot-toast';
+
+const client = generateClient();
 
 interface ChatWindowProps {
   conversation: Conversation;
@@ -35,8 +39,15 @@ export default function ChatWindow({ conversation }: ChatWindowProps) {
   const initializeChat = async () => {
     try {
       const user = await getCurrentUser();
+      const userAttributes = await fetchUserAttributes();
       setCurrentUserId(user.userId);
-      await fetchMessages();
+
+      // Ensure user exists in database
+      if (userAttributes.email) {
+        await getOrCreateUser(userAttributes.email, user.userId);
+      }
+
+      await fetchMessages(user.userId);
       setupSubscriptions();
     } catch (error) {
       console.error('Error initializing chat:', error);
@@ -45,24 +56,86 @@ export default function ChatWindow({ conversation }: ChatWindowProps) {
     }
   };
 
-  const fetchMessages = async () => {
+  const fetchMessages = async (userId?: string) => {
     try {
-      const mockMessages = generateMessagesForConversation(conversation, currentUserId || 'current-user');
-      setMessages(mockMessages);
+      const userIdToUse = userId || currentUserId || 'current-user';
+
+      // Fetch real messages from backend
+      const realMessages = await getConversationMessages(conversation.id);
+
+      // Map backend data to frontend Message type
+      const mappedMessages: Message[] = realMessages.map((msg: any) => ({
+        id: msg.id,
+        content: msg.content,
+        authorId: msg.authorId,
+        conversationId: msg.conversationId,
+        type: msg.type as MessageType,
+        isEdited: msg.isEdited || false,
+        createdAt: msg.createdAt,
+        updatedAt: msg.updatedAt,
+        author: msg.author || {
+          id: msg.authorId,
+          email: 'unknown@example.com',
+          username: 'unknown',
+          displayName: msg.authorId === userIdToUse ? 'You' : 'User',
+          isOnline: false,
+          createdAt: msg.createdAt,
+          updatedAt: msg.updatedAt,
+        },
+      }));
+
+      setMessages(mappedMessages);
     } catch (error) {
       console.error('Error fetching messages:', error);
+      // Fallback to empty array on error
+      setMessages([]);
     }
   };
 
   const setupSubscriptions = () => {
-    // Setup real-time subscriptions for:
-    // - New messages
-    // - Typing indicators
-    // - Read receipts
-    // - Message reactions
-    
-    // Mock subscription setup
-    console.log('Setting up subscriptions for conversation:', conversation.id);
+    // Subscribe to new messages in this conversation
+    const subscription = client.graphql({
+      query: subscriptions.onCreateMessage,
+      variables: { conversationId: conversation.id }
+    }).subscribe({
+      next: ({ data }: any) => {
+        const newMessage = data.onCreateMessage;
+        if (newMessage && newMessage.authorId !== currentUserId) {
+          // Only add messages from other users (our own are added optimistically)
+          setMessages(prev => {
+            // Check if message already exists
+            if (prev.some(m => m.id === newMessage.id)) {
+              return prev;
+            }
+            return [...prev, {
+              id: newMessage.id,
+              content: newMessage.content,
+              authorId: newMessage.authorId,
+              conversationId: newMessage.conversationId,
+              type: newMessage.type as MessageType,
+              isEdited: newMessage.isEdited || false,
+              createdAt: newMessage.createdAt,
+              updatedAt: newMessage.updatedAt,
+              author: newMessage.author || {
+                id: newMessage.authorId,
+                email: 'unknown@example.com',
+                username: 'unknown',
+                displayName: 'User',
+                isOnline: false,
+                createdAt: newMessage.createdAt,
+                updatedAt: newMessage.updatedAt,
+              },
+            }];
+          });
+        }
+      },
+      error: (error: any) => console.error('Subscription error:', error)
+    });
+
+    // Clean up subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   };
 
   const scrollToBottom = () => {
@@ -72,9 +145,10 @@ export default function ChatWindow({ conversation }: ChatWindowProps) {
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !currentUserId) return;
 
+    const messageContent = newMessage;
     const optimisticMessage: Message = {
       id: `temp-${Date.now()}`,
-      content: newMessage,
+      content: messageContent,
       authorId: currentUserId,
       conversationId: conversation.id,
       type: MessageType.TEXT,
@@ -97,20 +171,24 @@ export default function ChatWindow({ conversation }: ChatWindowProps) {
     setNewMessage('');
 
     try {
-      // Send message via GraphQL mutation
-      // const result = await client.graphql({
-      //   query: sendMessage,
-      //   variables: {
-      //     conversationId: conversation.id,
-      //     content: newMessage,
-      //     type: 'TEXT',
-      //   },
-      // });
+      // Send message to backend
+      const result = await sendMessageToConversation(
+        conversation.id,
+        messageContent,
+        'TEXT'
+      );
 
-      // Update with real message ID
-      // setMessages(prev => prev.map(msg => 
-      //   msg.id === optimisticMessage.id ? result.data.sendMessage : msg
-      // ));
+      if (result) {
+        // Update with real message from backend
+        setMessages(prev => prev.map(msg =>
+          msg.id === optimisticMessage.id ? {
+            ...msg,
+            id: result.id,
+            createdAt: result.createdAt,
+            updatedAt: result.updatedAt,
+          } : msg
+        ));
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
