@@ -231,16 +231,23 @@ export async function sendMessageToConversation(
   type: string = 'TEXT'
 ) {
   try {
+    const { getCurrentUser } = await import('aws-amplify/auth');
+    const currentUser = await getCurrentUser();
+
     const { data } = (await client.graphql({
-      query: mutations.sendMessage,
+      query: mutations.createMessage,
       variables: {
-        conversationId,
-        content,
-        type
+        input: {
+          conversationId,
+          authorId: currentUser.userId,
+          content,
+          type,
+          isEdited: false
+        }
       }
     })) as any;
 
-    return data?.sendMessage;
+    return data?.createMessage;
   } catch (error) {
     console.error('Error sending message:', error);
     throw error;
