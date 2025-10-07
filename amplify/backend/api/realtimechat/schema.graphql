@@ -1,6 +1,5 @@
 type User @model @auth(rules: [
-  { allow: owner, ownerField: "id", operations: [read, update, delete] },
-  { allow: private, operations: [create, read] }
+  { allow: private, operations: [create, read, update] }
 ]) {
   id: ID!
   email: String! @index(name: "byEmail", queryField: "getUserByEmail")
