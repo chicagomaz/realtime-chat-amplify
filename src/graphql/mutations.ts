@@ -49,6 +49,14 @@ export const deleteUser = /* GraphQL */ `
   ) {
     deleteUser(input: $input, condition: $condition) {
       id
+      email
+      username
+      displayName
+      avatar
+      isOnline
+      lastSeenAt
+      createdAt
+      updatedAt
       __typename
     }
   }
@@ -72,9 +80,12 @@ export const createConversation = /* GraphQL */ `
   }
 `;
 
-export const createDirectConversation = /* GraphQL */ `
-  mutation CreateDirectConversation($recipientId: ID!) {
-    createDirectConversation(recipientId: $recipientId) {
+export const updateConversation = /* GraphQL */ `
+  mutation UpdateConversation(
+    $input: UpdateConversationInput!
+    $condition: ModelConversationConditionInput
+  ) {
+    updateConversation(input: $input, condition: $condition) {
       id
       name
       isGroup
@@ -87,9 +98,12 @@ export const createDirectConversation = /* GraphQL */ `
   }
 `;
 
-export const createGroupConversation = /* GraphQL */ `
-  mutation CreateGroupConversation($name: String!, $memberIds: [ID!]!) {
-    createGroupConversation(name: $name, memberIds: $memberIds) {
+export const deleteConversation = /* GraphQL */ `
+  mutation DeleteConversation(
+    $input: DeleteConversationInput!
+    $condition: ModelConversationConditionInput
+  ) {
+    deleteConversation(input: $input, condition: $condition) {
       id
       name
       isGroup
@@ -118,38 +132,6 @@ export const createMessage = /* GraphQL */ `
       isEdited
       createdAt
       updatedAt
-      author {
-        id
-        email
-        displayName
-        avatar
-        __typename
-      }
-      __typename
-    }
-  }
-`;
-
-export const sendMessage = /* GraphQL */ `
-  mutation SendMessage($conversationId: ID!, $content: String!, $type: String!) {
-    sendMessage(conversationId: $conversationId, content: $content, type: $type) {
-      id
-      conversationId
-      authorId
-      content
-      type
-      attachmentUrl
-      attachmentType
-      isEdited
-      createdAt
-      updatedAt
-      author {
-        id
-        email
-        displayName
-        avatar
-        __typename
-      }
       __typename
     }
   }
@@ -183,6 +165,75 @@ export const deleteMessage = /* GraphQL */ `
   ) {
     deleteMessage(input: $input, condition: $condition) {
       id
+      conversationId
+      authorId
+      content
+      type
+      attachmentUrl
+      attachmentType
+      isEdited
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+
+export const createConversationMember = /* GraphQL */ `
+  mutation CreateConversationMember(
+    $input: CreateConversationMemberInput!
+    $condition: ModelConversationMemberConditionInput
+  ) {
+    createConversationMember(input: $input, condition: $condition) {
+      id
+      userId
+      conversationId
+      role
+      joinedAt
+      isActive
+      lastReadAt
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+
+export const updateConversationMember = /* GraphQL */ `
+  mutation UpdateConversationMember(
+    $input: UpdateConversationMemberInput!
+    $condition: ModelConversationMemberConditionInput
+  ) {
+    updateConversationMember(input: $input, condition: $condition) {
+      id
+      userId
+      conversationId
+      role
+      joinedAt
+      isActive
+      lastReadAt
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+
+export const deleteConversationMember = /* GraphQL */ `
+  mutation DeleteConversationMember(
+    $input: DeleteConversationMemberInput!
+    $condition: ModelConversationMemberConditionInput
+  ) {
+    deleteConversationMember(input: $input, condition: $condition) {
+      id
+      userId
+      conversationId
+      role
+      joinedAt
+      isActive
+      lastReadAt
+      createdAt
+      updatedAt
       __typename
     }
   }

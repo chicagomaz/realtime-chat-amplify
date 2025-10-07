@@ -1,0 +1,117 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-realtimechat-prod-e227b-authRole",
+      "UnauthRoleArn": "arn:aws:iam::453929087590:role/amplify-realtimechat-prod-e227b-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::453929087590:role/amplify-realtimechat-prod-e227b-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-realtimechat-prod-e227b-deployment",
+      "UnauthRoleName": "amplify-realtimechat-prod-e227b-unauthRole",
+      "StackName": "amplify-realtimechat-prod-e227b",
+      "StackId": "arn:aws:cloudformation:us-east-1:453929087590:stack/amplify-realtimechat-prod-e227b/47eaa8a0-9fc5-11f0-b9b2-0e8a0b552e0d",
+      "AmplifyAppId": "d34rmw54y15yon"
+    }
+  },
+  "auth": {
+    "realtimechat75d27768": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false,
+      "frontendAuthConfig": {
+        "socialProviders": [],
+        "usernameAttributes": [
+          "EMAIL"
+        ],
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-realtimechat-prod-e227b-deployment/amplify-cfn-templates/auth/realtimechat75d27768-cloudformation-template.json",
+        "logicalId": "authrealtimechat75d27768"
+      },
+      "lastPushTimeStamp": "2025-10-07T15:58:04.939Z",
+      "output": {
+        "UserPoolId": "us-east-1_d9Aamd24m",
+        "AppClientIDWeb": "3jf74vn98km452693m85k0knsf",
+        "AppClientID": "1mbpb5em4jg1qb4aam20caobs1",
+        "IdentityPoolId": "us-east-1:2a9d551c-6443-4700-a2da-3cb838433135",
+        "UserPoolArn": "arn:aws:cognito-idp:us-east-1:453929087590:userpool/us-east-1_d9Aamd24m",
+        "IdentityPoolName": "realtimechat75d27768_identitypool_75d27768__prod",
+        "UserPoolName": "realtimechat75d27768_userpool_75d27768"
+      },
+      "lastPushDirHash": "hx9DLLGdSGFhfJgr9E7HpfQ8Prw="
+    }
+  },
+  "api": {
+    "realtimechat": {
+      "service": "AppSync",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [
+        {
+          "category": "auth",
+          "resourceName": "realtimechat75d27768",
+          "attributes": [
+            "UserPoolId"
+          ]
+        }
+      ],
+      "output": {
+        "authConfig": {
+          "defaultAuthentication": {
+            "authenticationType": "API_KEY",
+            "apiKeyConfig": {
+              "apiKeyExpirationDays": 7
+            }
+          },
+          "additionalAuthenticationProviders": [
+            {
+              "authenticationType": "AMAZON_COGNITO_USER_POOLS",
+              "userPoolConfig": {
+                "userPoolId": "authrealtimechat75d27768"
+              }
+            }
+          ]
+        },
+        "GraphQLAPIIdOutput": "ru5vxk7vcfbenk4oqybwivpg7m",
+        "GraphQLAPIEndpointOutput": "https://hvachayc35b4zjmfqxe63imj3e.appsync-api.us-east-1.amazonaws.com/graphql",
+        "GraphQLAPIKeyOutput": "da2-bs263tllkbdwpm7bctno5afvze"
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-realtimechat-prod-e227b-deployment/amplify-cfn-templates/api/cloudformation-template.json",
+        "logicalId": "apirealtimechat"
+      },
+      "lastPushTimeStamp": "2025-10-07T15:58:04.961Z",
+      "lastPushDirHash": "34V+AxJV0MCgVQc2EXG7v8QX/qI="
+    }
+  },
+  "storage": {
+    "chatappStorage": {
+      "service": "S3",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "lastPushTimeStamp": "2025-10-07T15:58:14.055Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-realtimechat-prod-e227b-deployment/amplify-cfn-templates/storage/cloudformation-template.json",
+        "logicalId": "storagechatappStorage"
+      },
+      "output": {
+        "BucketName": "chatappstoragee227b-prod",
+        "Region": "us-east-1"
+      },
+      "lastPushDirHash": "Q6ybeBcQ9/u4YOpCNcD3+uGUMMY="
+    }
+  }
+}

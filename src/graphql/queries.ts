@@ -128,13 +128,6 @@ export const getMessage = /* GraphQL */ `
       isEdited
       createdAt
       updatedAt
-      author {
-        id
-        email
-        displayName
-        avatar
-        __typename
-      }
       __typename
     }
   }
@@ -194,13 +187,6 @@ export const messagesByConversation = /* GraphQL */ `
         isEdited
         createdAt
         updatedAt
-        author {
-          id
-          email
-          displayName
-          avatar
-          __typename
-        }
         __typename
       }
       nextToken

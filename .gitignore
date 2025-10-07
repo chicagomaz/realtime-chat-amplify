@@ -20,6 +20,11 @@ amplifytools.xcconfig
 **.sample
 #amplify-do-not-edit-end
 
+# Amplify Gen 2
+amplify_outputs.json
+.amplify/
+amplify/generated/
+
 # Next.js
 .next/
 out/

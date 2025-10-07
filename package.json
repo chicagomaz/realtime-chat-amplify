@@ -9,7 +9,9 @@
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "sandbox": "npx ampx sandbox",
+    "sandbox:delete": "npx ampx sandbox delete"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.0.0",
