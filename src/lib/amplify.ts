@@ -1,9 +1,9 @@
 import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/api';
 import { getCurrentUser } from 'aws-amplify/auth';
-import awsExports from '@/aws-exports';
+import outputs from '../../amplify_outputs.json';
 
-Amplify.configure(awsExports);
+Amplify.configure(outputs);
 
 export const client = generateClient();
 
